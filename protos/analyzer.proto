@@ -1,0 +1,15 @@
+syntax = "proto3";
+option csharp_namespace = "ColorAnalyzer";
+package analyzer;
+
+service ColorAnalyzer {
+  rpc AnalyzeColors (ImageData) returns (ColorPalette);
+}
+
+message ImageData {
+  bytes image_data = 1;
+}
+
+message ColorPalette {
+  repeated string colors = 1;
+} 
