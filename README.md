@@ -145,13 +145,13 @@ O script irá:
 
 Configure os endereços dos serviços backend via variáveis de ambiente:
 
-- `COLOR_ANALYZER_ADDRESS` (padrão: localhost:50051)
-- `IMAGE_FILTER_ADDRESS` (padrão: localhost:50052)
+- `COLOR_ANALYZER_ADDRESS` (padrão: localhost:5281)
+- `IMAGE_FILTER_ADDRESS` (padrão: localhost:5281)
 
 Exemplo:
 
 ```sh
-COLOR_ANALYZER_ADDRESS=localhost:50051 IMAGE_FILTER_ADDRESS=localhost:50052 pnpm ts-node src/example-grpc-test.ts
+COLOR_ANALYZER_ADDRESS=localhost:5281 IMAGE_FILTER_ADDRESS=localhost:50052 pnpm ts-node src/example-grpc-test.ts
 ```
 
 ## Documentação dos arquivos proto

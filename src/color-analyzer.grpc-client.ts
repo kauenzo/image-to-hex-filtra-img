@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { join } from 'path';
@@ -25,7 +25,7 @@ const analyzerProto = (
 
 // Endereço do serviço ColorAnalyzer (ajuste conforme necessário)
 const COLOR_ANALYZER_ADDRESS =
-  process.env.COLOR_ANALYZER_ADDRESS || 'localhost:50051';
+  process.env.COLOR_ANALYZER_ADDRESS || 'localhost:5281';
 
 // Criação do client gRPC
 export const colorAnalyzerClient = new analyzerProto.ColorAnalyzer(
@@ -44,10 +44,7 @@ interface ColorPalette {
  */
 export function analyzeColors(imageBuffer: Buffer): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    colorAnalyzerClient.makeUnaryRequest(
-      '/analyzer.ColorAnalyzer/AnalyzeColors',
-      (arg: any) => arg,
-      (arg: any) => arg,
+    (colorAnalyzerClient as any).AnalyzeColors(
       { image_data: imageBuffer },
       (err: grpc.ServiceError | null, response: ColorPalette | undefined) => {
         if (err) return reject(err);
