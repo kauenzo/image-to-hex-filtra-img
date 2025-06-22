@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { analyzeColors } from './color-analyzer.grpc-client';
 import { applyFilterStream } from './image-filter.grpc-client';
+import { ImageUtils } from './image-utils';
 
 @Injectable()
 export class AppService {
@@ -9,7 +10,9 @@ export class AppService {
    * @param imageBuffer Buffer da imagem
    */
   async analyzeImageColors(imageBuffer: Buffer): Promise<string[]> {
-    return analyzeColors(imageBuffer);
+    const checkedBuffer =
+      await ImageUtils.validateAndCompressImage(imageBuffer);
+    return analyzeColors(checkedBuffer);
   }
 
   /**
@@ -23,6 +26,8 @@ export class AppService {
     filterType: number,
     imageBuffer: Buffer,
   ): Promise<Buffer> {
-    return applyFilterStream(imageId, filterType, imageBuffer);
+    const checkedBuffer =
+      await ImageUtils.validateAndCompressImage(imageBuffer);
+    return applyFilterStream(imageId, filterType, checkedBuffer);
   }
 }
