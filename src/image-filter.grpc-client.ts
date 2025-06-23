@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { join } from 'path';
 
-// Caminho para o arquivo .proto
 const PROTO_PATH = join(__dirname, '../protos/Filter.proto');
 
-// Carregar definição do proto
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
   longs: String,
@@ -14,24 +11,22 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   defaults: true,
   oneofs: true,
 });
-// O cast abaixo é necessário pois o grpc.loadPackageDefinition retorna um tipo genérico
+
 const filterProto = (
   grpc.loadPackageDefinition(packageDefinition) as unknown as {
     filters: {
-      ImageFilterService: grpc.ServiceClientConstructor;
+      ImageFilterService: any;
     };
   }
 ).filters;
 
-// Endereço do serviço ImageFilterService (ajuste conforme necessário)
 const IMAGE_FILTER_ADDRESS =
-  process.env.IMAGE_FILTER_ADDRESS || 'localhost:50052';
+  process.env.IMAGE_FILTER_ADDRESS || 'localhost:5281';
 
-// Criação do client gRPC
 export const imageFilterClient = new filterProto.ImageFilterService(
   IMAGE_FILTER_ADDRESS,
   grpc.credentials.createInsecure(),
-) as grpc.Client;
+);
 
 interface ImageFilterChunk {
   image_id: string;
@@ -56,17 +51,11 @@ export function applyFilterStream(
   chunkSize = 64 * 1024,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const call = (
-      imageFilterClient as unknown as grpc.Client
-    ).makeBidiStreamRequest(
-      '/filters.ImageFilterService/ApplyFilterStream',
-      (arg: any) => arg,
-      (arg: any) => arg,
-    );
+    const call = imageFilterClient.ApplyFilterStream();
+
     const totalChunks = Math.ceil(imageBuffer.length / chunkSize);
     const receivedBuffers: Buffer[] = [];
 
-    // Envia os chunks
     for (let i = 0; i < totalChunks; i++) {
       const start = i * chunkSize;
       const end = Math.min(start + chunkSize, imageBuffer.length);
@@ -81,9 +70,8 @@ export function applyFilterStream(
     }
     call.end();
 
-    // Recebe os chunks processados
     call.on('data', (chunk: ImageFilterChunk) => {
-      if (chunk && Buffer.isBuffer(chunk.data)) {
+      if (chunk?.data instanceof Buffer) {
         receivedBuffers.push(chunk.data);
       }
     });
